@@ -76,10 +76,14 @@ class VideoFetcher:
             # 提取视频ID
             video_id = self._extract_video_id(url)
 
-            # 查找下载的文件
-            video_files = list(self.output_dir.glob(f"*[{video_id}].mp4"))
+            # 查找下载的文件（匹配包含video_id的mp4文件）
+            video_files = [f for f in self.output_dir.glob("*.mp4") if video_id in f.stem]
+
             if not video_files:
-                raise Exception(f"未找到下载的视频文件")
+                # 尝试直接列出所有mp4文件来调试
+                all_mp4 = list(self.output_dir.glob("*.mp4"))
+                logger.debug(f"找到的mp4文件: {[f.name for f in all_mp4]}")
+                raise Exception(f"未找到下载的视频文件 (video_id: {video_id})")
 
             video_path = video_files[0]
             logger.success(f"视频下载成功: {video_path.name}")
