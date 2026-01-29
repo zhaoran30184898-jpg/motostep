@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{{ analysis.title }}">
+    <title>{{ analysis.title }}</title>
+    <style>
+        /* 微信公众号内联样式 */
+        .article-container {
+            max-width: 677px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: -apple-system-font, "Helvetica Neue", sans-serif;
+            line-height: 1.8;
+            color: #333;
+        }
+
+        .article-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #000;
+        }
+
+        .article-meta {
+            text-align: center;
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .intro-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .intro-section h2 {
+            margin-top: 0;
+            font-size: 18px;
+            border-bottom: 2px solid rgba(255,255,255,0.3);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        .intro-section p {
+            margin: 0;
+            line-height: 1.8;
+        }
+
+        .technique-section {
+            margin-bottom: 40px;
+        }
+
+        .technique-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .technique-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+
+        .technique-title {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            flex: 1;
+        }
+
+        .media-container {
+            margin: 20px 0;
+            text-align: center;
+        }
+
+        .media-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .media-caption {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .description-box {
+            background: #f7f7f7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .description-box p {
+            margin: 0;
+            line-height: 1.8;
+        }
+
+        .key-points {
+            margin: 20px 0;
+        }
+
+        .key-points-title {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 10px;
+            color: #667eea;
+        }
+
+        .key-points ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .key-points li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .summary-section {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-top: 40px;
+        }
+
+        .summary-section h2 {
+            margin-top: 0;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            color: #888;
+            font-size: 12px;
+        }
+
+        .highlight {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        /* GIF特殊样式 */
+        .gif-badge {
+            display: inline-block;
+            background: #f5576c;
+            color: white;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="article-container">
+        <!-- 文章标题 -->
+        <h1 class="article-title">{{ analysis.title }}</h1>
+
+        <!-- 文章元信息 -->
+        <div class="article-meta">
+            <p>视频ID: {{ analysis.video_id }}</p>
+            <p>关键技术点: {{ analysis.key_moments|length }} 个</p>
+        </div>
+
+        <!-- 介绍部分 -->
+        <section class="intro-section">
+            <h2>📹 内容概要</h2>
+            <p>{{ analysis.content }}</p>
+        </section>
+
+        <!-- 技术讲解部分 -->
+        {% for moment in analysis.key_moments %}
+        <section class="technique-section">
+            <div class="technique-header">
+                <div class="technique-number">{{ loop.index }}</div>
+                <div class="technique-title">
+                    {{ moment.technique }}
+                    {% if moment.media_type == 'gif' %}
+                    <span class="gif-badge">GIF演示</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- 媒体内容 -->
+            {% if moment.media_asset %}
+            <div class="media-container">
+                {% if moment.media_asset.type == 'gif' %}
+                <img src="{{ moment.media_asset.local_path }}"
+                     alt="{{ moment.technique }}"
+                     style="max-width: 100%; height: auto;" />
+                {% else %}
+                <img src="{{ moment.media_asset.local_path }}"
+                     alt="{{ moment.technique }}"
+                     style="max-width: 100%; height: auto;" />
+                {% endif %}
+                <p class="media-caption">
+                    📍 时间点: {{ moment.timestamp }}秒
+                    {% if moment.duration %}
+                    (时长: {{ moment.duration }}秒)
+                    {% endif %}
+                </p>
+            </div>
+            {% endif %}
+
+            <!-- 技术描述 -->
+            <div class="description-box">
+                <p>{{ moment.description }}</p>
+            </div>
+        </section>
+        {% endfor %}
+
+        <!-- 总结部分 -->
+        <section class="summary-section">
+            <h2>🎯 技术总结</h2>
+            <p>本视频详细讲解了 {{ analysis.key_moments|length }} 项关键技术，通过慢动作演示和详细讲解，帮助你掌握正确的技术要领。</p>
+        </section>
+
+        <!-- 页脚 -->
+        <div class="footer">
+            <p>内容由 MotoStep 自动生成</p>
+            <p>来源视频: {{ analysis.video_id }}</p>
+            <p>© {{ metadata.created_at|default('2026') }} FreeSoloDirtbike</p>
+        </div>
+    </div>
+</body>
+</html>

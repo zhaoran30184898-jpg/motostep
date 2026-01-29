@@ -24,6 +24,7 @@ class KeyMoment(BaseModel):
     technique: str = Field(..., description="技术要点")
     media_type: str = Field(..., description="媒体类型 (static/gif)")
     duration: Optional[float] = Field(None, description="GIF时长（秒）")
+    media_asset: Optional['MediaAsset'] = Field(None, description="关联的媒体资产")
 
 
 class VideoAnalysis(BaseModel):

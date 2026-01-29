@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ analysis.title }} - MotoStep Report</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .report-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .header-meta {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .intro-box {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 30px;
+        }
+
+        .intro-box h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .technique-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .technique-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .technique-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .technique-card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .technique-number {
+            background: rgba(255,255,255,0.2);
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .technique-card-body {
+            padding: 20px;
+        }
+
+        .media-wrapper {
+            background: #f5f5f5;
+            border-radius: 8px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+
+        .media-wrapper img {
+            width: 100%;
+            display: block;
+        }
+
+        .media-info {
+            padding: 10px;
+            font-size: 12px;
+            color: #666;
+            background: #fff;
+        }
+
+        .description {
+            color: #555;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .timestamp-badge {
+            display: inline-block;
+            background: #f5576c;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-right: 10px;
+        }
+
+        .media-type-badge {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 3px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        .stats-section {
+            background: #f8f9fa;
+            padding: 30px;
+            margin-top: 40px;
+            border-radius: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            font-size: 14px;
+            border-top: 1px solid #e0e0e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="report-container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>{{ analysis.title }}</h1>
+            <div class="header-meta">
+                <p>视频ID: {{ analysis.video_id }}</p>
+                <p>关键技术点: {{ analysis.key_moments|length }} 个</p>
+            </div>
+        </div>
+
+        <!-- 内容区 -->
+        <div class="content">
+            <!-- 简介 -->
+            <div class="intro-box">
+                <h3>📹 内容概要</h3>
+                <p>{{ analysis.content }}</p>
+            </div>
+
+            <!-- 技术卡片网格 -->
+            <div class="technique-grid">
+                {% for moment in analysis.key_moments %}
+                <div class="technique-card">
+                    <div class="technique-card-header">
+                        <span style="font-weight: bold;">{{ moment.technique }}</span>
+                        <span class="technique-number">{{ loop.index }}</span>
+                    </div>
+                    <div class="technique-card-body">
+                        {% if moment.media_asset %}
+                        <div class="media-wrapper">
+                            <img src="{{ moment.media_asset.local_path }}"
+                                 alt="{{ moment.technique }}"
+                                 loading="lazy" />
+                            <div class="media-info">
+                                <span class="timestamp-badge">⏱️ {{ moment.timestamp }}s</span>
+                                {% if moment.media_type == 'gif' %}
+                                <span class="media-type-badge">🎞️ GIF</span>
+                                {% else %}
+                                <span class="media-type-badge">📷 图片</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <p class="description">{{ moment.description }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- 统计信息 -->
+            <div class="stats-section">
+                <h3 style="margin-bottom: 20px;">📊 技术统计</h3>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">{{ analysis.key_moments|length }}</div>
+                        <div class="stat-label">技术总数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ analysis.key_moments|selectattr('media_type', 'equalto', 'gif')|list|length }}</div>
+                        <div class="stat-label">GIF演示</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">{{ analysis.key_moments|selectattr('media_type', 'equalto', 'static')|list|length }}</div>
+                        <div class="stat-label">静态图片</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 页脚 -->
+        <div class="footer">
+            <p>内容由 MotoStep 自动生成</p>
+            <p>来源视频: {{ analysis.video_id }}</p>
+            <p>生成时间: {{ metadata.created_at|default('2026-01-30') }}</p>
+        </div>
+    </div>
+</body>
+</html>
