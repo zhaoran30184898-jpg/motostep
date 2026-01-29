@@ -186,8 +186,8 @@ MIT License
 
 ## 联系方式
 
-- 项目地址：https://github.com/yourusername/motostep
-- 问题反馈：https://github.com/yourusername/motostep/issues
+- 项目地址：https://github.com/zhaoran30184898-jpg/motostep
+- 问题反馈：https://github.com/zhaoran30184898-jpg/motostep/issues
 
 ---
 
