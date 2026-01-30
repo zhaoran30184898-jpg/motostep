@@ -28,7 +28,7 @@ class VideoFetcher:
         self,
         url: str,
         quality: str = "720p",
-        cookies_path: str = "cookies.txt"
+        cookies_path: str = None
     ) -> VideoInfo:
         """
         下载YouTube视频
@@ -44,34 +44,42 @@ class VideoFetcher:
         logger.info(f"开始下载视频: {url}")
         logger.info(f"质量: {quality}")
 
-        # 构建yt-dlp命令
-        # 根据质量选择格式
-        if quality == "1080p":
-            format_spec = "bestvideo[height<=1080]+bestaudio"
-        else:  # 720p (默认)
-            format_spec = "bestvideo[height<=720]+bestaudio"
+        # 使用yt-dlp Python库
+        try:
+            import yt_dlp
+        except ImportError:
+            raise Exception("yt-dlp未安装，请运行: pip install yt-dlp")
 
-        cmd = [
-            "yt-dlp",
-            "--cookies", cookies_path,
-            "-f", format_spec,
-            "--merge-output-format", "mp4",
-            "-o", str(self.output_dir / "%(title)s. [%(id)s].%(ext)s"),
-            url
-        ]
+        # 根据质量选择格式 - 使用更灵活的格式选择
+        if quality == "1080p":
+            format_spec = "bestvideo[height<=?1080]+bestaudio/best[height<=?1080]"
+        elif quality == "480p":
+            format_spec = "bestvideo[height<=?480]+bestaudio/best[height<=?480]"
+        else:  # 720p (默认)
+            format_spec = "bestvideo[height<=?720]+bestaudio/best[height<=?720]"
+
+        # 配置yt-dlp选项
+        ydl_opts = {
+            'format': format_spec,
+            'merge_output_format': 'mp4',
+            'outtmpl': str(self.output_dir / "%(title)s. [%(id)s].%(ext)s"),
+            'quiet': False,
+            'no_warnings': False,
+            'ignoreerrors': True,  # 忽略不可用格式
+        }
+
+        # 添加cookies（如果提供）
+        if cookies_path and Path(cookies_path).exists():
+            ydl_opts['cookiefile'] = cookies_path
+            logger.info(f"使用cookies: {cookies_path}")
+        elif cookies_path:
+            logger.warning(f"⚠ Cookies文件不存在: {cookies_path}")
 
         try:
-            # 执行下载
-            logger.debug(f"执行命令: {' '.join(cmd)}")
-            result = subprocess.run(
-                cmd,
-                capture_output=True,
-                text=True,
-                check=True
-            )
-
-            # 解析输出获取视频信息
-            output = result.stdout
+            # 下载视频
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                logger.info("开始下载...")
+                ydl.download([url])
 
             # 提取视频ID
             video_id = self._extract_video_id(url)
@@ -80,21 +88,20 @@ class VideoFetcher:
             video_files = [f for f in self.output_dir.glob("*.mp4") if video_id in f.stem]
 
             if not video_files:
-                # 尝试直接列出所有mp4文件来调试
                 all_mp4 = list(self.output_dir.glob("*.mp4"))
                 logger.debug(f"找到的mp4文件: {[f.name for f in all_mp4]}")
                 raise Exception(f"未找到下载的视频文件 (video_id: {video_id})")
 
             video_path = video_files[0]
-            logger.success(f"视频下载成功: {video_path.name}")
+            logger.success(f"✓ 视频下载成功: {video_path.name}")
 
             # 获取视频信息
             video_info = self._get_video_info(url, video_path)
             return video_info
 
-        except subprocess.CalledProcessError as e:
-            logger.error(f"下载失败: {e.stderr}")
-            raise Exception(f"视频下载失败: {e.stderr}")
+        except Exception as e:
+            logger.error(f"下载失败: {e}")
+            raise Exception(f"视频下载失败: {e}")
 
     def download_subtitles(
         self,

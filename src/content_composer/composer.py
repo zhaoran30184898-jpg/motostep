@@ -387,3 +387,107 @@ class ContentComposer:
                 templates.append(file.name)
 
         return sorted(templates)
+
+    def compose_plain_text(
+        self,
+        analysis: VideoAnalysis,
+        media_assets: List[MediaAsset],
+        output_path: Optional[str] = None
+    ) -> str:
+        """
+        合成纯文本报告（无格式，适用于任何平台）
+
+        Args:
+            analysis: 视频分析结果
+            media_assets: 媒体资产列表
+            output_path: 输出文件路径（可选）
+
+        Returns:
+            生成的纯文本内容
+        """
+        logger.info("合成纯文本报告...")
+
+        # 匹配媒体资产
+        matched_analysis = self._match_media_to_moments(analysis, media_assets)
+
+        # 生成纯文本内容
+        lines = []
+
+        # 标题和元数据
+        lines.append(analysis.title)
+        lines.append("")
+        lines.append(f"来源: {analysis.video_id}")
+        lines.append(f"生成时间: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        lines.append("")
+        lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        lines.append("")
+
+        # 内容概要
+        if analysis.content:
+            lines.append("内容概要:")
+            lines.append("")
+            lines.append(analysis.content)
+            lines.append("")
+            lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+            lines.append("")
+
+        # 关键技术点
+        if matched_analysis.key_moments:
+            lines.append("关键技术详解:")
+            lines.append("")
+
+            for i, moment in enumerate(matched_analysis.key_moments, 1):
+                # 技术标题
+                lines.append(f"{i}. {moment.technique}")
+                lines.append("")
+
+                # 时间信息
+                lines.append(f"时间点: {moment.timestamp}秒")
+                if moment.duration:
+                    lines.append(f"时长: {moment.duration}秒")
+                lines.append("")
+
+                # 媒体类型
+                if moment.media_type == 'gif':
+                    lines.append("[动图演示]")
+                elif moment.media_type == 'static':
+                    lines.append("[静态图片]")
+                lines.append("")
+
+                # 技术说明
+                lines.append(moment.description)
+                lines.append("")
+
+                # 媒体文件信息
+                if moment.media_asset:
+                    media_type = "动图" if moment.media_type == 'gif' else "图片"
+                    lines.append(f"[{media_type}: {moment.technique}]")
+                    lines.append("")
+
+                lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+                lines.append("")
+
+            # 统计信息
+            lines.append("技术统计:")
+            lines.append("")
+            lines.append(f"• 技术总数: {len(matched_analysis.key_moments)} 项")
+            gif_count = sum(1 for m in matched_analysis.key_moments if m.media_type == 'gif')
+            img_count = sum(1 for m in matched_analysis.key_moments if m.media_type == 'static')
+            lines.append(f"• 动图演示: {gif_count} 个")
+            lines.append(f"• 静态图片: {img_count} 个")
+            lines.append("")
+
+        # 页脚
+        lines.append("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        lines.append("")
+        lines.append("内容由 MotoStep 自动生成")
+        lines.append(f"来源视频: {analysis.video_id}")
+
+        rendered_content = "\n".join(lines)
+
+        # 保存
+        if output_path:
+            self._save_content(rendered_content, output_path, "plain_text.txt")
+
+        logger.success("✓ 纯文本报告生成完成")
+        return rendered_content

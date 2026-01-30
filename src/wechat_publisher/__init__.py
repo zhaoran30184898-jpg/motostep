@@ -1,5 +1,6 @@
-"""微信公众号发布模块"""
-from .client import WeChatClient
-from .draft_manager import DraftManager
+"""微信公众号推送模块"""
 
-__all__ = ['WeChatClient', 'DraftManager']
+from .publisher import WeChatPublisher
+from .media_uploader import MediaUploader
+
+__all__ = ['WeChatPublisher', 'MediaUploader']
